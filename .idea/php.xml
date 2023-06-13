@@ -124,7 +124,7 @@
       <server host="localhost" id="e42a841b-cbaf-4dc8-9b12-0ffa1e2d5980" name="bilemo" port="8080" />
     </servers>
   </component>
-  <component name="PhpProjectSharedConfiguration" php_language_level="8.1">
+  <component name="PhpProjectSharedConfiguration" php_language_level="7.4">
     <option name="suggestChangeDefaultLanguageLevel" value="false" />
   </component>
   <component name="PhpStanOptionsConfiguration">
