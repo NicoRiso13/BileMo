@@ -2,17 +2,49 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ClientRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Hateoas\Configuration\Annotation as Hateoas;
 
 /**
+ * @Hateoas\Relation(
+ *     name = "self",
+ *     href = @Hateoas\Route(
+ *         "app_details_client",
+ *         parameters = {"id" = "expr(object.getId())"}
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups="getUsers")
+ * )
+ *
+ *
+ * @Hateoas\Relation(
+ *     name ="delete",
+ *     href = @Hateoas\Route(
+ *         "app_delete_client",
+ *         parameters = {"id" = "expr(object.getId())"}
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups="getUsers", excludeIf = "expr(not is_granted('ROLE_ADMIN'))"),
+ * )
+ *
+ *
+ * @Hateoas\Relation(
+ *     name = "update",
+ *     href = @Hateoas\Route(
+ *         "app_update_client",
+ *         parameters = {"id" = "expr(object.getId())"}
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups="getUsers", excludeIf = "expr(not is_granted('ROLE_ADMIN'))"),
+ * )
+ *
  * @ORM\Entity(repositoryClass=ClientRepository::class)
+ * @ApiResource()
  */
 class Client implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -27,14 +59,16 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @ORM\Column(type="string", length=100)
      * @Groups({"getUsers"})
-     * @Assert\NotBlank(message="Le nom de l'utilisateur est obligatoire")
-     * @Assert\Length(min={1}, max={100}, minMessage="Le nom doit faire au moins {{ limit }} caractères", maxMessage="Le nom ne doit pas dépasser {{ limit }} caractères")
+     * @Assert\NotBlank(message="Le nom du client est obligatoire")
+     * @Assert\Length(min=1,max=100,minMessage="Le nom doit faire au moins {{ limit }} caractères",maxMessage="Le nom ne doit pas dépasser {{ limit }} caractères")
      */
     private string $name;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
      * @Groups({"getUsers"})
+     * @Assert\NotBlank(message="L'email du client est obligatoire")
+     * @Assert\Length(min=1,max=180,minMessage="L'email doit faire au moins {{ limit }} caractères",minMessage="L'email ne doit pas depasser {{ limit }} caractères")
      */
     private ?string $email;
 
@@ -47,6 +81,8 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      * @ORM\Column(type="string")
      * @Groups({"getUsers"})
+     * @Assert\NotBlank(message="Le mot de passe du client est obligatoire")
+     * @Assert\Length(min=8,max=255,minMessage="Le mot de passe doit faire au moins {{ limit }} caractères",maxMessage="Le mot de passe ne doit pas dépasser {{ limit }} caractères")
      */
     private string $password;
 

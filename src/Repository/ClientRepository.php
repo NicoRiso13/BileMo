@@ -56,4 +56,13 @@ class ClientRepository extends ServiceEntityRepository implements PasswordUpgrad
         $this->add($user, true);
     }
 
+    public function findAllClientsWithPagination($page, $limit)
+    {
+        $qb = $this->createQueryBuilder('b')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        return $qb->getQuery()->getResult();
+    }
+
 }
