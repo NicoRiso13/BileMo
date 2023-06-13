@@ -21,7 +21,7 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
-    public function findAllUsersWithPagination($page, $limit)
+    public function findAllUsersWithPagination(int $page,int $limit): int
     {
         $qb = $this->createQueryBuilder('b')
             ->setFirstResult(($page - 1) * $limit)

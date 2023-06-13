@@ -198,7 +198,7 @@ class User extends \JMS\Serializer\DeserializationContext implements UserInterfa
     /**
      * @see UserInterface
      */
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
 
     }
