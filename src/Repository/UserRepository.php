@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManager;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -21,13 +22,29 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
-    public function findAllUsersWithPagination(int $page,int $limit): int
+    public function findAllUsersWithPaginationAndClient(int $page,int $limit, ?int $clientId): array
     {
         $qb = $this->createQueryBuilder('b')
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
+        if($clientId !== null){
+            $qb->where('b.client = :clientId')
+            ->setParameter('clientId', $clientId);
+        }
 
         return $qb->getQuery()->getResult();
+    }
+
+    public function findByClient(EntityManager $entityManager, int $clientId): array
+    {
+        $queryBuilder = $entityManager->createQueryBuilder();
+        $queryBuilder->select('u')
+            ->from('Utilisateur', 'u')
+            ->join('u.client', 'c')
+            ->where($queryBuilder->expr()->eq('c.id', ':clientId'))
+            ->setParameter('clientId', $clientId);
+
+        return $queryBuilder->getQuery()->getResult();
     }
 
     public function add(User $entity, bool $flush = false): void

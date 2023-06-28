@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Client;
+use App\Manager\ClientManager;
 use App\Repository\ClientRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
@@ -90,10 +91,9 @@ class ClientsController extends AbstractController
      * @Route("/api/clients/{id}", name="app_delete_client", methods={"DELETE"})
      * @IsGranted("ROLE_ADMIN", message="Vous n'avez pas les droits suffisants pour supprimer un client")
      */
-    public function deleteClient(Client $client, EntityManagerInterface $entityManager): JsonResponse
+    public function deleteClient(Client $client, EntityManagerInterface $entityManager, ClientManager $clientManager): JsonResponse
     {
-        $entityManager->remove($client);
-        $entityManager->flush();
+        $clientManager->deleteClient($client, $entityManager);
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
@@ -101,7 +101,7 @@ class ClientsController extends AbstractController
      * @Route("/api/clients", name="app_create_client", methods={"POST"})
      * @IsGranted("ROLE_ADMIN", message="Vous n'avez pas les droits suffisants pour créer un client")
      */
-    public function createClient(Request $request, SerializerInterface $serializer, EntityManagerInterface $entityManager, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
+    public function createClient(Request $request, SerializerInterface $serializer, EntityManagerInterface $entityManager,ClientManager $clientManager, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
     {
         $client = $serializer->deserialize($request->getContent(), Client::class, 'json');
 
@@ -110,12 +110,8 @@ class ClientsController extends AbstractController
         if ($errors->count() > 0) {
             return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
         }
-        $password = $request->get('password');
-        $client->setRoles(["ROLE_ADMIN"]);
-        $client->setPassword($this->userPasswordHasher->hashPassword($client, "$password"));
-        $entityManager->persist($client);
-        $entityManager->flush();
 
+       $clientManager->createClient($client);
         $context = SerializationContext::create()->setGroups(["getUsers"]);
         $jsonClient = $serializer->serialize($client, 'json', $context);
 

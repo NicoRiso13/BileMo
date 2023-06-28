@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiResource;
+
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -43,7 +43,6 @@ use Hateoas\Configuration\Annotation as Hateoas;
  * )
  *
  * @ORM\Entity(repositoryClass=UserRepository::class)
- * @ApiResource()
  */
 class User extends \JMS\Serializer\DeserializationContext implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -79,7 +78,6 @@ class User extends \JMS\Serializer\DeserializationContext implements UserInterfa
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
-     * @Groups({"getUsers"})
      * @Assert\NotBlank(message="Le mot de passe du client est obligatoire")
      * @Assert\Length(min=8,max=180,minMessage="Le mot de passe doit faire au moins {{ limit }} caractères", maxMessage="Le mot de passe ne doit pas dépasser {{ limit }} caractères")
      */

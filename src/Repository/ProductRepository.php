@@ -21,7 +21,10 @@ class ProductRepository extends ServiceEntityRepository
         parent::__construct($registry, Product::class);
     }
 
-    public function findAllProductsWithPagination(int $page, int $limit): int
+    /**
+     * @return array<Product>
+     */
+    public function findAllProductsWithPagination(int $page, int $limit): array
     {
         $qb = $this->createQueryBuilder('b')
             ->setFirstResult(($page - 1) * $limit)
@@ -29,6 +32,8 @@ class ProductRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
+
+
 
     public function add(Product $entity, bool $flush = false): void
     {
