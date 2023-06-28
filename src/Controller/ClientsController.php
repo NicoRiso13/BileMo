@@ -25,12 +25,6 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 class ClientsController extends AbstractController
 {
 
-    private UserPasswordHasherInterface $userPasswordHasher;
-
-    public function __construct(UserPasswordHasherInterface $passwordHasher)
-    {
-        $this->userPasswordHasher = $passwordHasher;
-    }
 
     /**
      * * Cette méthode permet de récupérer l'ensemble des clients.
@@ -101,7 +95,7 @@ class ClientsController extends AbstractController
      * @Route("/api/clients", name="app_create_client", methods={"POST"})
      * @IsGranted("ROLE_ADMIN", message="Vous n'avez pas les droits suffisants pour créer un client")
      */
-    public function createClient(Request $request, SerializerInterface $serializer, EntityManagerInterface $entityManager,ClientManager $clientManager, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
+    public function createClient(Request $request, SerializerInterface $serializer,ClientManager $clientManager, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
     {
         $client = $serializer->deserialize($request->getContent(), Client::class, 'json');
 
@@ -137,6 +131,9 @@ class ClientsController extends AbstractController
         if($errors->count() > 0){
             return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST,[], true);
         }
+
+        // On vide le cache
+        $cache->invalidateTags(["clientsCache"]);
 
         $entityManager->persist($updateClient);
         $entityManager->flush();

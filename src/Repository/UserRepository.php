@@ -35,17 +35,6 @@ class UserRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findByClient(EntityManager $entityManager, int $clientId): array
-    {
-        $queryBuilder = $entityManager->createQueryBuilder();
-        $queryBuilder->select('u')
-            ->from('Utilisateur', 'u')
-            ->join('u.client', 'c')
-            ->where($queryBuilder->expr()->eq('c.id', ':clientId'))
-            ->setParameter('clientId', $clientId);
-
-        return $queryBuilder->getQuery()->getResult();
-    }
 
     public function add(User $entity, bool $flush = false): void
     {

@@ -27,20 +27,12 @@ class Product
      */
     private ?string $name;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private ?string $picture;
 
     /**
      * @ORM\Column(type="text")
      */
     private ?string $description;
 
-    /**
-     * @ORM\Column(type="datetime_immutable")
-     */
-    private ?\DateTimeImmutable $createdAt;
 
     public function getId(): ?int
     {
@@ -71,17 +63,6 @@ class Product
         return $this;
     }
 
-    public function getPicture(): ?string
-    {
-        return $this->picture;
-    }
-
-    public function setPicture(string $picture): self
-    {
-        $this->picture = $picture;
-
-        return $this;
-    }
 
     public function getDescription(): ?string
     {
@@ -95,15 +76,4 @@ class Product
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): self
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
 }

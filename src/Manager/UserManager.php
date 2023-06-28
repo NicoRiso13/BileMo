@@ -21,7 +21,7 @@ class UserManager
         $this->userPasswordHasher = $userPasswordHasher;
     }
 
-    public function createUser(User $user)
+    public function createUser(User $user): void
     {
         $password = $user->getPassword();
         $user->setRoles(["ROLE_USER"]);
@@ -30,22 +30,11 @@ class UserManager
         $this->entityManager->flush();
     }
 
-    public function updateUser(User $user, Request $request, SerializerInterface $serializer)
+
+    public function deleteUser(User $user): void
     {
-        $updateUser = $serializer->deserialize($request->getContent(), User::class, 'json');
-
-        $password = $user->getPassword();
-        $updateUser->setName($user->getName());
-        $updateUser->setEmail($user->getEmail());
-        $updateUser->setPassword($this->userPasswordHasher->hashPassword($user, "$password"));
-
-    }
-
-    public function deleteUser(User $user, EntityManagerInterface $entityManager)
-    {
-        $entityManager->remove($user);
-        $entityManager->flush();
-
+        $this->entityManager->remove($user);
+        $this->entityManager->flush();
     }
 
 }

@@ -20,7 +20,7 @@ class ClientManager
         $this->userPasswordHasher = $userPasswordHasher;
     }
 
-    public function createClient(Client $client)
+    public function createClient(Client $client): void
     {
         $password = $client->getPassword();
         $client->setRoles(["ROLE_USER"]);
@@ -29,21 +29,10 @@ class ClientManager
         $this->entityManager->flush();
     }
 
-    public function updateClient(Client $client, Request $request, SerializerInterface $serializer)
+    public function deleteClient(Client $client): void
     {
-        $updateUser = $serializer->deserialize($request->getContent(), User::class, 'json');
-
-        $password = $client->getPassword();
-        $updateUser->setName($client->getName());
-        $updateUser->setEmail($client->getEmail());
-        $updateUser->setPassword($this->userPasswordHasher->hashPassword($client, "$password"));
-
-    }
-
-    public function deleteClient(Client $client, EntityManagerInterface $entityManager)
-    {
-        $entityManager->remove($client);
-        $entityManager->flush();
+        $this->entityManager->remove($client);
+        $this->entityManager->flush();
 
     }
 
