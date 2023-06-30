@@ -6,6 +6,7 @@ use App\Entity\Client;
 use App\Manager\ClientManager;
 use App\Repository\ClientRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use OpenApi\Annotations as OA;
@@ -26,7 +27,7 @@ class ClientsController extends AbstractController
 
 
     /**
-     * * Cette méthode permet de récupérer l'ensemble des clients.
+     * Cette méthode permet de récupérer l'ensemble des clients.
      *
      * @OA\Response(
      *     response=200,
@@ -71,6 +72,9 @@ class ClientsController extends AbstractController
     }
 
     /**
+     * Cette méthode permet de récupérer les détails d'un client.
+     * @OA\Tag(name="Clients")
+     *
      * @Route("/api/clients/{id}", name="app_details_client", methods={"GET"})
      */
     public function getDetailsClient(Client $client, SerializerInterface $serializer): JsonResponse
@@ -81,22 +85,43 @@ class ClientsController extends AbstractController
     }
 
     /**
+     * Cette méthode permet de supprimer un client.
+     * @OA\Tag(name="Clients")
+     *
      * @Route("/api/clients/{id}", name="app_delete_client", methods={"DELETE"})
      * @IsGranted("ROLE_ADMIN", message="Vous n'avez pas les droits suffisants pour supprimer un client")
      */
-    public function deleteClient(Client $client, EntityManagerInterface $entityManager, ClientManager $clientManager): JsonResponse
+    public function deleteClient(Client $client, ClientManager $clientManager): JsonResponse
     {
-        $clientManager->deleteClient($client, $entityManager);
+        $connectedUser = $this->getUser();
+        $admin = $connectedUser->getUserIdentifier();
+        if($admin !== "adminBilemo@admin.fr") {
+            throw $this->createAccessDeniedException();
+        }
+
+        $clientManager->deleteClient($client);
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
     /**
+     * Cette méthode permet d'ajouter un client.
+     *
+     * @OA\RequestBody(@Model(type=Client::class, groups={"createClient"}))
+     * @OA\Tag(name="Clients")
+     *
      * @Route("/api/clients", name="app_create_client", methods={"POST"})
      * @IsGranted("ROLE_ADMIN", message="Vous n'avez pas les droits suffisants pour créer un client")
      */
     public function createClient(Request $request, SerializerInterface $serializer, ClientManager $clientManager, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
     {
-        $client = $serializer->deserialize($request->getContent(), Client::class, 'json');
+        $context = DeserializationContext::create()->setGroups(["createClient"]);
+        $client = $serializer->deserialize($request->getContent(), Client::class, 'json', $context);
+
+        $connectedUser = $this->getUser();
+        $admin = $connectedUser->getUserIdentifier();
+        if($admin !== "adminBilemo@admin.fr") {
+            throw $this->createAccessDeniedException();
+        }
 
         //Vérification des erreurs
         $errors = $validator->validate($client);
@@ -114,12 +139,24 @@ class ClientsController extends AbstractController
     }
 
     /**
+     * Cette méthode permet de mettre à jour un client.
+     *
+     * @OA\RequestBody(@Model(type=Client::class, groups={"updateClient"}))
+     * @OA\Tag(name="Clients")
+     *
      * @Route("/api/clients/{id}", name="app_update_client", methods={"PUT"})
      * @IsGranted("ROLE_ADMIN", message="Vous n'avez pas les droits suffisants pour mettre à jour un client")
      */
     public function updateClient(Request $request, SerializerInterface $serializer, EntityManagerInterface $entityManager, Client $currentClient, ValidatorInterface $validator, TagAwareCacheInterface $cache): JsonResponse
     {
-        $updateClient = $serializer->deserialize($request->getContent(), Client::class, 'json');
+        $context = DeserializationContext::create()->setGroups(["updateClient"]);
+        $updateClient = $serializer->deserialize($request->getContent(), Client::class, 'json', $context);
+
+        $connectedUser = $this->getUser();
+        $admin = $connectedUser->getUserIdentifier();
+        if($admin !== "adminBilemo@admin.fr") {
+            throw $this->createAccessDeniedException();
+        }
 
         $currentClient->setName($updateClient->getName());
         $currentClient->setEmail($updateClient->getEmail());

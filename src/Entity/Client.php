@@ -56,13 +56,13 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\Column(type="string", length=100)
-     * @Groups({"getUsers"})
+     * @Groups({"getUsers","createClient","updateClient"})
      */
     private string $name;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
-     * @Groups({"getUsers"})
+     * @Groups({"getUsers","createClient","updateClient"})
      */
     private ?string $email;
 
@@ -74,6 +74,7 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
+     * @Groups({"createClient","updateClient"})
      */
     private string $password;
 
@@ -141,7 +142,7 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+        $roles[] = 'ROLE_ADMIN';
 
         return array_unique($roles);
     }

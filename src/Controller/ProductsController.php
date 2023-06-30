@@ -20,7 +20,7 @@ class ProductsController extends AbstractController
 {
     /**
      *
-     * * Cette méthode permet de récupérer l'ensemble des produits.
+     * Cette méthode permet de récupérer l'ensemble des produits.
      *
      * @OA\Response(
      *     response=200,
@@ -65,6 +65,9 @@ class ProductsController extends AbstractController
     }
 
     /**
+     * Cette méthode permet de récupérer les détails d'un produit.
+     * @OA\Tag(name="Products")
+     *
      * @Route("/api/products/{id}", name="app_details_products", methods={"GET"})
      */
     public function getDetailsProduct(Product $product, SerializerInterface $serializer): JsonResponse
