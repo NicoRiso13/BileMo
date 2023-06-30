@@ -2,15 +2,15 @@
 
 namespace App\Entity;
 
-
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\DeserializationContext;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use JMS\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Hateoas\Configuration\Annotation as Hateoas;
-
 
 /**
  * @Hateoas\Relation(
@@ -43,8 +43,10 @@ use Hateoas\Configuration\Annotation as Hateoas;
  * )
  *
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ *
+ * @UniqueEntity("email", message="Cet email est deja utilisé")
  */
-class User extends \JMS\Serializer\DeserializationContext implements UserInterface, PasswordAuthenticatedUserInterface
+class User extends DeserializationContext implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /**
      * @ORM\Id
@@ -67,6 +69,7 @@ class User extends \JMS\Serializer\DeserializationContext implements UserInterfa
      * @Groups({"getUsers"})
      * @Assert\NotBlank(message="L'email de l'utilisateur est obligatoire")
      * @Assert\Length(min=1,max=180, minMessage="L'email doit faire au moins {{ limit }} caractères", maxMessage="L'email ne doit pas dépasser {{ limit }} caractères")
+     * @Assert\Email()
      */
     private ?string $email;
 

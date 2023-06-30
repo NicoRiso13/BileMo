@@ -14,7 +14,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -95,7 +94,7 @@ class ClientsController extends AbstractController
      * @Route("/api/clients", name="app_create_client", methods={"POST"})
      * @IsGranted("ROLE_ADMIN", message="Vous n'avez pas les droits suffisants pour créer un client")
      */
-    public function createClient(Request $request, SerializerInterface $serializer,ClientManager $clientManager, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
+    public function createClient(Request $request, SerializerInterface $serializer, ClientManager $clientManager, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
     {
         $client = $serializer->deserialize($request->getContent(), Client::class, 'json');
 
@@ -105,7 +104,7 @@ class ClientsController extends AbstractController
             return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
         }
 
-       $clientManager->createClient($client);
+        $clientManager->createClient($client);
         $context = SerializationContext::create()->setGroups(["getUsers"]);
         $jsonClient = $serializer->serialize($client, 'json', $context);
 
@@ -128,8 +127,8 @@ class ClientsController extends AbstractController
 
         // On verifie les erreurs
         $errors = $validator->validate($currentClient);
-        if($errors->count() > 0){
-            return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST,[], true);
+        if($errors->count() > 0) {
+            return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
         }
 
         // On vide le cache
