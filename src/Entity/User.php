@@ -4,15 +4,49 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\DeserializationContext;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Hateoas\Configuration\Annotation as Hateoas;
 
 /**
+ * @Hateoas\Relation(
+ *     name = "self",
+ *     href = @Hateoas\Route(
+ *         "app_details_users",
+ *         parameters = {"id" = "expr(object.getId())"}
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups="getUsers")
+ * )
+ *
+ *
+ * @Hateoas\Relation(
+ *     name ="delete",
+ *     href = @Hateoas\Route(
+ *         "app_delete_user",
+ *         parameters = {"id" = "expr(object.getId())"}
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups="getUsers", excludeIf = "expr(not is_granted('ROLE_ADMIN'))"),
+ * )
+ *
+ *
+ * @Hateoas\Relation(
+ *     name = "update",
+ *     href = @Hateoas\Route(
+ *         "app_update_user",
+ *         parameters = {"id" = "expr(object.getId())"}
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups="getUsers", excludeIf = "expr(not is_granted('ROLE_ADMIN'))"),
+ * )
+ *
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ *
+ * @UniqueEntity("email", message="Cet email est deja utilisé")
  */
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User extends DeserializationContext implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /**
      * @ORM\Id
@@ -24,19 +58,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\Column(type="string", length=100)
-     * @Groups({"getUsers"})
+     * @Groups({"getUsers","createUser","updateUser"})
      * @Assert\NotBlank(message="Le nom de l'utilisateur est obligatoire")
-     * @Assert\Length(min={1}, max={100}, minMessage="Le nom doit faire au moins {{ limit }} caractères", maxMessage="Le nom ne doit pas dépasser {{ limit }} caractères")
+     * @Assert\Length(min=1,max=100,minMessage="Le nom doit faire au moins {{ limit }} caractères",maxMessage="Le nom ne doit pas dépasser {{ limit }} caractères")
      */
     private string $name;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
-     * @Groups({"getUsers"})
+     * @Groups({"getUsers","createUser","updateUser"})
      * @Assert\NotBlank(message="L'email de l'utilisateur est obligatoire")
-     * @Assert\Length(min={1}, max={255}, minMessage="L'email' doit faire au moins {{ limit }} caractères", maxMessage="L'email ne doit pas dépasser {{ limit }} caractères")
+     * @Assert\Length(min=1,max=180, minMessage="L'email doit faire au moins {{ limit }} caractères", maxMessage="L'email ne doit pas dépasser {{ limit }} caractères")
+     * @Assert\Email()
      */
-    private string $email;
+    private ?string $email;
 
     /**
      * @ORM\Column(type="json")
@@ -46,7 +81,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
-     * @Groups({"getUsers"})
+     * @Groups({"createUser","updateUser"})
+     * @Assert\NotBlank(message="Le mot de passe du client est obligatoire")
+     * @Assert\Length(min=8,max=180,minMessage="Le mot de passe doit faire au moins {{ limit }} caractères", maxMessage="Le mot de passe ne doit pas dépasser {{ limit }} caractères")
      */
     private string $password;
 
@@ -148,6 +185,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
     /**
      * Returning a salt is only needed, if you are not using a modern
      * hashing algorithm (e.g. bcrypt or sodium) in your security.yaml.
@@ -162,9 +200,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @see UserInterface
      */
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
-        // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
+
     }
 }
